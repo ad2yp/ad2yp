@@ -1,0 +1,52 @@
+adjust /var/yp/Makefile as needed
+
+# mkdir /var/yp/ypfiles
+
+# diff Makefile.orig Makefile
+32,33c32,33
+< MINUID=500
+< MINGID=500
+---
+> MINUID=1000
+> MINGID=1000
+42c42
+< MERGE_PASSWD=true
+---
+> MERGE_PASSWD=false
+46c46
+< MERGE_GROUP=true
+---
+> MERGE_GROUP=false
+62c62
+< YPPWDDIR = /etc
+---
+> YPPWDDIR = /var/yp/ypfiles
+77c77
+< #ALIASES     = $(YPSRCDIR)/aliases  # aliases could be in /etc or /etc/mail
+---
+> ALIASES     = $(YPSRCDIR)/aliases  # aliases could be in /etc or /etc/mail
+117c117,118
+< all:  passwd group hosts rpc services netid protocols mail \
+---
+> all:  passwd group
+>       # hosts rpc services netid protocols mail \
+
+
+NIS map entries are limited to 1024 characters in length (can be increased for linux using --no-limit-check)
+
+# diff Makefile.short-groups Makefile
+130c130
+< DBLOAD = $(YPBINDIR)/makedbm -c -m `$(YPBINDIR)/yphelper --hostname`
+---
+> DBLOAD = $(YPBINDIR)/makedbm --no-limit-check -c -m `$(YPBINDIR)/yphelper --hostname`
+
+Workaround for non Linux systems: create an empty group with correct name and GID, and subgroups with same GID and same name with suffixes like -1, -2, -3, etc. for the group members
+
+
+adjust /etc/init.d/ypbind if local host only on RedHat
+
+# diff /etc/init.d/ypbind.orig ypbind
+18c18
+< OTHER_YPBIND_OPTS=""
+---
+> OTHER_YPBIND_OPTS="-no-ping -local-only -no-dbus"
